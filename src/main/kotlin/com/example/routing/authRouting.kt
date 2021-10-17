@@ -12,12 +12,13 @@ fun Route.authRouting(){
     val col = DB.user
     route("/signup"){
         post {
-            val authRequest = call.receive<AuthRequest>()
-            if (col.insertOne(authRequest.user).wasAcknowledged()){
-                call.respondText("User Successfully Created", status = HttpStatusCode.Created)
-            } else {
-                call.respondText("User Creation Failed", status = HttpStatusCode.BadRequest)
-            }
+            val user = call.receive<User>()
+            call.respond(user)
+//            if (col.insertOne(user).wasAcknowledged()){
+//                call.respondText("User Successfully Created", status = HttpStatusCode.Created)
+//            } else {
+//                call.respondText("User Creation Failed", status = HttpStatusCode.BadRequest)
+//            }
         }
     }
 
