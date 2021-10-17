@@ -20,10 +20,17 @@ repositories {
 }
 
 dependencies {
+    def ktor_version = '1.6.4'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation 'io.ktor:ktor-server-core:1.6.4'
-    implementation 'io.ktor:ktor-server-netty:1.6.4'
+    implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-server-netty:$ktor_version"
     implementation 'ch.qos.logback:logback-classic:1.2.6'
-    implementation 'io.ktor:ktor-serialization:1.6.4'
+    implementation "io.ktor:ktor-serialization:$ktor_version"
+//    implementation 'org.litote.kmongo:kmongo:4.3.0'
+    implementation 'org.litote.kmongo:kmongo-coroutine:4.3.0'
+
+//    implementation "io.ktor:ktor-auth:$ktor_version"
+//    implementation "io.ktor:ktor-auth-jwt:$ktor_version"
 
 }

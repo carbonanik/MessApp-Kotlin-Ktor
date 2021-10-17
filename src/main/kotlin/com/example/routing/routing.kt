@@ -7,6 +7,7 @@ import io.ktor.routing.*
 fun Application.initializeRouting(){
     routing {
         userRouting()
+        authRouting()
         get("/") {
             call.respondText("Hello, world!")
         }
