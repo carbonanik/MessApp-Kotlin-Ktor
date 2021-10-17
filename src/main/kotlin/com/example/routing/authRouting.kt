@@ -7,13 +7,18 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.litote.kmongo.json
 
 fun Route.authRouting(){
     val col = DB.user
     route("/signup"){
         post {
-            val user = call.receive<User>()
-            call.respond(user)
+            try {
+                val user = call.receive<User>()
+                call.respond(user)
+            } catch (e: Exception){
+                call.respond(e.json)
+            }
 //            if (col.insertOne(user).wasAcknowledged()){
 //                call.respondText("User Successfully Created", status = HttpStatusCode.Created)
 //            } else {
