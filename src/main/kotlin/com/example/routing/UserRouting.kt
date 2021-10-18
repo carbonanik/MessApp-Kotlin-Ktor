@@ -1,54 +1,79 @@
 package com.example.routing
 
-import com.example.User
-import com.example.db.DB
+import com.example.authentication.JwtConfig
+import com.example.db.*
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.litote.kmongo.`in`
-import org.litote.kmongo.eq
 
 fun Route.userRouting() {
-    val col = DB.user
     route("/user") {
-        get {
-            val list = col.find().toList()
-            if (list.isNotEmpty()) {
-                call.respond(list)
-            } else {
-                call.respondText("No user found", status = HttpStatusCode.NotFound)
+        authenticate("auth-jwt") {
+            val userCol = DataBase.user
+
+            /**
+             * testing purpose only
+             */
+            get("/auth") {
+                val jwtUser = call.authentication.principal as JwtConfig.JwtUser
+                call.respondText("Hello, ${jwtUser.name}")
             }
-        }
 
-        get("/by-name/{name}") {
-            val name = call.parameters["name"]
-                ?: return@get call.respondText(
-                    "No Name Provided Or Bad Request",
-                    status = HttpStatusCode.BadRequest
-                )
-            val user = DB.user.findOne(User::name eq name)
-                ?: return@get call.respondText(
-                    "No user with name $name",
-                    status = HttpStatusCode.NotFound
-                )
-            call.respond(user)
-        }
+            /**
+             * get total user list
+             * it will be removed
+             */
+            get("/list") {
+                val list = userCol.getAll()
+                if (list.isNotEmpty()) {
+                    call.respond(list)
+                } else {
+                    call.respondText("No user found", status = HttpStatusCode.NotFound)
+                }
+            }
 
-        post("/by-phone") {
-            val numbers = call.receive<List<String>>()
-            val users = col.find(User::phone `in` numbers).toList()
-            call.respond(users)
-        }
+            /**
+             * get user by his name
+             */
+            get("/by-name/{name}") {
+                val name = call.parameters["name"]
+                    ?: return@get call.respondText(
+                        "No Name Provided Or Bad Request",
+                        status = HttpStatusCode.BadRequest
+                    )
+                val user = userCol.getByName(name)
+                    ?: return@get call.respondText(
+                        "No user with name $name",
+                        status = HttpStatusCode.NotFound
+                    )
+                call.respond(user)
+            }
 
-        delete("{id}") {
-//            val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-//            if (userStorage.removeIf { it.id == id }) {
-//                call.respondText("User removed correctly", status = HttpStatusCode.Accepted)
-//            } else {
-//                call.respondText("Not Found", status = HttpStatusCode.NotFound)
-//            }
+            /**
+             * get list of user that match the number list provided by user
+             */
+            post("/by-phone") {
+                val numbers = call.receive<List<String>>()
+                val users = userCol.getByPhones(numbers)
+                if (users.isNotEmpty()) {
+                    call.respond(users)
+                } else {
+                    call.respondText("No User Found")
+                }
+            }
+
+            delete("{id}") {
+                val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
+                if (userCol.delete(id)) {
+                    call.respondText("User Successfully Removed", status = HttpStatusCode.Accepted)
+                } else {
+                    call.respondText("Not Successfully Removed", status = HttpStatusCode.NotFound)
+                }
+            }
         }
     }
 }

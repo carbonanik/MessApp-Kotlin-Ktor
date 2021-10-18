@@ -1,6 +1,6 @@
 package com.example.routing
 
-import com.example.User
+import com.example.entity.User
 import kotlinx.serialization.Serializable
 
 @Serializable

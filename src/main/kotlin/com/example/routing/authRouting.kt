@@ -1,7 +1,12 @@
 package com.example.routing
 
-import com.example.User
-import com.example.db.DB
+import com.example.db.DataBase
+import com.example.db.getByPhone
+import com.example.entity.LoginBody
+import com.example.entity.User
+import com.example.entity.isNotEmpty
+import com.example.entity.toJwtUser
+import com.example.jwtConfig
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -9,30 +14,34 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.authRouting() {
-    val col = DB.user
+    val col = DataBase.user
+
     route("/signup") {
         post {
-//            try {
             val user = call.receive<User>()
-            call.respond(user)
-//            } catch (e: Exception){
-//                call.respond(e.json)
-//            }
-//            if (col.insertOne(user).wasAcknowledged()){
-//                call.respondText("User Successfully Created", status = HttpStatusCode.Created)
-//            } else {
-//                call.respondText("User Creation Failed", status = HttpStatusCode.BadRequest)
-//            }
+
+            if (user.isNotEmpty()) {
+                if (col.insertOne(user).wasAcknowledged()) {
+                    call.respondText("User Created", status = HttpStatusCode.Created)
+                } else {
+                    call.respondText("User Creation Failed", status = HttpStatusCode.BadRequest)
+                }
+            } else {
+                call.respondText("Insufficient Information", status = HttpStatusCode.BadRequest)
+            }
         }
     }
 
     route("/login") {
         post {
-            val authRequest = call.receive<AuthRequest>()
-            if (col.insertOne(authRequest.user).wasAcknowledged()) {
-                call.respondText("User stored correctly", status = HttpStatusCode.Created)
+            val loginBody = call.receive<LoginBody>()
+            val user = col.getByPhone(loginBody.phone)
+
+            if (user != null && user.password == loginBody.password) {
+                val token = jwtConfig.generateToken(user.toJwtUser())
+                call.respond(hashMapOf("token" to token))
             } else {
-                call.respondText("User not correctly stored", status = HttpStatusCode.BadRequest)
+                call.respondText("No Match Found", status = HttpStatusCode.NotFound)
             }
         }
     }
