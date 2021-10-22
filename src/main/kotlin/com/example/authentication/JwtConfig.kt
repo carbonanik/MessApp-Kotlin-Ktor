@@ -14,6 +14,7 @@ class JwtConfig(jwtSecret: String) {
 
         private const val CLAIM_PHONE = "phone"
         private const val CLAIM_NAME = "name"
+        private const val CLAIM_ID = "id"
     }
 
     private val jwtAlgorithm = Algorithm.HMAC256(jwtSecret)
@@ -27,7 +28,8 @@ class JwtConfig(jwtSecret: String) {
         .withIssuer(jwtIssuer)
         .withClaim(CLAIM_PHONE, user.phone)
         .withClaim(CLAIM_NAME, user.name)
-        .withExpiresAt(Date(System.currentTimeMillis() + 60*60*1000))
+        .withClaim(CLAIM_ID, user.id)
+        .withExpiresAt(Date(System.currentTimeMillis() + 60 * 60 * 1000))
         .sign(jwtAlgorithm)
 
     fun configureKtorFeature(
@@ -38,15 +40,16 @@ class JwtConfig(jwtSecret: String) {
         realm = jwtRealm
 
         validate {
+            val id = it.payload.getClaim(CLAIM_ID).asString()
             val phone = it.payload.getClaim(CLAIM_PHONE).asString()
             val name = it.payload.getClaim(CLAIM_NAME).asString()
             if (!phone.isNullOrEmpty() && !name.isNullOrEmpty()) {
-                JwtUser(phone, name)
+                JwtUser(id, phone, name)
             } else {
                 null
             }
         }
     }
 
-    data class JwtUser(val phone: String, val name: String): Principal
+    data class JwtUser(val id: String, val phone: String, val name: String) : Principal
 }

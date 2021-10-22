@@ -8,6 +8,7 @@ fun Application.initializeRouting(){
     routing {
         userRouting()
         authRouting()
+        socketRoute()
         get("/") {
             call.respondText("Hello, world!")
         }

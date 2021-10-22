@@ -1,6 +1,7 @@
 package com.example.routing
 
 import com.example.db.DataBase
+import com.example.db.add
 import com.example.db.getByPhone
 import com.example.entity.LoginBody
 import com.example.entity.User
@@ -14,14 +15,14 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.authRouting() {
-    val col = DataBase.user
+    val userCol = DataBase.user
 
     route("/signup") {
         post {
             val user = call.receive<User>()
 
             if (user.isNotEmpty()) {
-                if (col.insertOne(user).wasAcknowledged()) {
+                if (userCol.add(user)) {
                     call.respondText("User Created", status = HttpStatusCode.Created)
                 } else {
                     call.respondText("User Creation Failed", status = HttpStatusCode.BadRequest)
@@ -35,7 +36,7 @@ fun Route.authRouting() {
     route("/login") {
         post {
             val loginBody = call.receive<LoginBody>()
-            val user = col.getByPhone(loginBody.phone)
+            val user = userCol.getByPhone(loginBody.phone)
 
             if (user != null && user.password == loginBody.password) {
                 val token = jwtConfig.generateToken(user.toJwtUser())

@@ -11,7 +11,7 @@ object DataBase {
 
     init {
         val client = KMongo.createClient(
-            System.getenv("MONGO_URI") ?: "" //todo
+            //System.getenv("MONGO_URI") ?: "" //todo
         ).coroutine
         val database = client.getDatabase("MessApp")
         user = database.getCollection("users")

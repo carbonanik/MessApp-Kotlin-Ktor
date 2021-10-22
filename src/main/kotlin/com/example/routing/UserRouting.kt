@@ -2,12 +2,16 @@ package com.example.routing
 
 import com.example.authentication.JwtConfig
 import com.example.db.*
+import com.example.entity.User
+import com.example.entity.toUser
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.bson.types.ObjectId
+import org.litote.kmongo.eq
 
 fun Route.userRouting() {
     route("/user") {
@@ -17,9 +21,10 @@ fun Route.userRouting() {
             /**
              * testing purpose only
              */
-            get("/auth") {
-                val jwtUser = call.authentication.principal as JwtConfig.JwtUser
-                call.respondText("Hello, ${jwtUser.name}")
+            get("/me") {
+                val jwtUser =
+                    call.authentication.principal as JwtConfig.JwtUser
+                call.respond(jwtUser.toUser())
             }
 
             /**
@@ -39,16 +44,23 @@ fun Route.userRouting() {
              * get user by his name
              */
             get("/by-name/{name}") {
-                val name = call.parameters["name"]
+                val name = call.parameters["name"] ?: return@get call.respondText(
+                        "No Name Provided Or Bad Request", status = HttpStatusCode.BadRequest)
+                val user = userCol.getByName(name) ?: return@get call.respondText(
+                        "No user with name $name", status = HttpStatusCode.NotFound)
+                call.respond(user)
+            }
+
+            /**
+             * get user by his name
+             */
+            get("/by-id/{id}") {
+                val id = call.parameters["id"] ?: return@get call.respondText(
+                    "No ID Provided Or Bad Request", status = HttpStatusCode.BadRequest
+                )
+                val user = userCol.getByID(id)
                     ?: return@get call.respondText(
-                        "No Name Provided Or Bad Request",
-                        status = HttpStatusCode.BadRequest
-                    )
-                val user = userCol.getByName(name)
-                    ?: return@get call.respondText(
-                        "No user with name $name",
-                        status = HttpStatusCode.NotFound
-                    )
+                    "No user with ID $id", status = HttpStatusCode.NotFound)
                 call.respond(user)
             }
 
@@ -65,7 +77,7 @@ fun Route.userRouting() {
                 }
             }
 
-            delete("{id}") {
+            delete("/{id}") {
                 val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
                 if (userCol.delete(id)) {
