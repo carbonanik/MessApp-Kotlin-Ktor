@@ -20,12 +20,12 @@ data class User(
     val password: String? = null,
 )
 
-fun User.isNotEmpty() = name.isNotEmpty()
-        && phone.isNotEmpty()
-        && !password.isNullOrEmpty()
-
 fun User.toJwtUser() =
     JwtConfig.JwtUser(id.toString(), phone, name)
+
+fun User.authResponse(token: String) =
+    AuthResponse(token, id.toString(), name, phone)
+
 
 fun JwtConfig.JwtUser.toUser() =
     User(id = ObjectId(id), name, phone)

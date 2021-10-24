@@ -3,10 +3,7 @@ package com.example.routing
 import com.example.db.DataBase
 import com.example.db.add
 import com.example.db.getByPhone
-import com.example.entity.LoginBody
-import com.example.entity.User
-import com.example.entity.isNotEmpty
-import com.example.entity.toJwtUser
+import com.example.entity.*
 import com.example.jwtConfig
 import io.ktor.application.*
 import io.ktor.http.*
@@ -19,31 +16,30 @@ fun Route.authRouting() {
 
     route("/signup") {
         post {
-            val user = call.receive<User>()
+            val requestBody = call.receive<AuthRequest>()
+            val user = requestBody.createUser()
+                ?: return@post call.respondText("Insufficient Information", status = HttpStatusCode.NotAcceptable)
 
-            if (user.isNotEmpty()) {
-                if (userCol.add(user)) {
-                    call.respondText("User Created", status = HttpStatusCode.Created)
-                } else {
-                    call.respondText("User Creation Failed", status = HttpStatusCode.BadRequest)
-                }
-            } else {
-                call.respondText("Insufficient Information", status = HttpStatusCode.BadRequest)
-            }
+            if (userCol.getByPhone(user.phone) != null) return@post call.respondText("Phone Number exist in database", status = HttpStatusCode.Conflict)
+
+            if (userCol.add(user)) {
+                val token = jwtConfig.generateToken(user.toJwtUser())
+                call.respond(user.authResponse(token)) }
+
+            else call.respondText("User Creation Failed", status = HttpStatusCode.InternalServerError)
         }
     }
 
     route("/login") {
         post {
-            val loginBody = call.receive<LoginBody>()
-            val user = userCol.getByPhone(loginBody.phone)
+            val authRequest = call.receive<AuthRequest>()
+            if (!authRequest.canLogin()) return@post call.respondText("Insufficient Information", status = HttpStatusCode.NotAcceptable)
 
-            if (user != null && user.password == loginBody.password) {
-                val token = jwtConfig.generateToken(user.toJwtUser())
-                call.respond(hashMapOf("token" to token))
-            } else {
-                call.respondText("No Match Found", status = HttpStatusCode.NotFound)
-            }
+            val user = userCol.getByPhone(authRequest.phone) ?: return@post call.respondText("No User Found", status = HttpStatusCode.NotFound)
+            if ( user.password != authRequest.password) return@post call.respondText("Password Dose Not Match", status = HttpStatusCode.NotFound)
+
+            val token = jwtConfig.generateToken(user.toJwtUser())
+            call.respond(user.authResponse(token))
         }
     }
 }
