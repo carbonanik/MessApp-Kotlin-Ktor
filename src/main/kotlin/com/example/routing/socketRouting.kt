@@ -1,56 +1,49 @@
 package com.example.routing
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.JWTVerifier
-import com.auth0.jwt.impl.JWTParser
 import com.example.authentication.JwtConfig
-import com.example.db.DataBase
 import com.example.entity.Message
 import com.example.util.fromJson
 import com.example.util.toJson
 import io.ktor.auth.*
-import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
-import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 
 @OptIn(ExperimentalSerializationApi::class)
 fun Route.socketRoute() {
-//    authenticate("auth-jwt") {
+    authenticate("auth-jwt") {
         val connections: MutableMap<String, Connection> = Collections.synchronizedMap(LinkedHashMap())
 
         webSocket("/socket") {
             val jwtUser = call.authentication.principal as JwtConfig.JwtUser
             val thisConnection = Connection(this, jwtUser)
-
             connections[jwtUser.id] = thisConnection
-            send("${jwtUser.name} you are connected")
-
+            println(jwtUser)
             try {
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val message = frame.readText().fromJson<Message>()
+                    println(message)
                     val client = connections[message.receiver?.id.toString()]
                     if (client != null){
                         client.session.send(message.toJson())
                     } else {
-                        // client not online process the message
+                        println("Client Not Online")
+                        println(message)
                     }
                 }
             } catch (e: Exception) {
                 println(e.localizedMessage)
             } finally {
-                connections.remove(jwtUser.id)
+//                connections.remove(jwtUser.id)
             }
         }
-//    }
+    }
 }
 
-class Connection(val session: DefaultWebSocketSession, val user: JwtConfig.JwtUser)
+data class Connection(val session: DefaultWebSocketSession, val user: JwtConfig.JwtUser)
 
 //class Connection(val session: DefaultWebSocketSession) {
 //    companion object {
