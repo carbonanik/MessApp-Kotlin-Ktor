@@ -25,19 +25,14 @@ fun Route.socketRoute() {
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val message = frame.readText().fromJson<Message>()
-                    println(message)
                     val client = connections[message.receiver?.id.toString()]
-                    if (client != null){
-                        client.session.send(message.toJson())
-                    } else {
-                        println("Client Not Online")
-                        println(message)
-                    }
+                    client?.session?.send(message.toJson())
+                    thisConnection.session.send(message.toJson())
                 }
             } catch (e: Exception) {
                 println(e.localizedMessage)
             } finally {
-//                connections.remove(jwtUser.id)
+                connections.remove(jwtUser.id)
             }
         }
     }
