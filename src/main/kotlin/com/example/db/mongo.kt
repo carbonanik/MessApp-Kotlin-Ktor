@@ -1,5 +1,7 @@
 package com.example.db
 
+import com.example.entity.ChatMessage
+import com.example.entity.Message
 import com.example.entity.User
 import com.example.remote
 import com.example.server
@@ -10,6 +12,7 @@ import org.litote.kmongo.reactivestreams.KMongo
 object DataBase {
 
     val user: CoroutineCollection<User>
+    val chatMessage: CoroutineCollection<ChatMessage>
 
     init {
         val client =
@@ -17,5 +20,6 @@ object DataBase {
             else KMongo.createClient().coroutine
         val database = client.getDatabase("MessApp")
         user = database.getCollection("users")
+        chatMessage = database.getCollection("chatMessage")
     }
 }

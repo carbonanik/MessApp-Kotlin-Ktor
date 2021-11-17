@@ -1,7 +1,10 @@
 package com.example.routing
 
 import com.example.authentication.JwtConfig
+import com.example.db.DataBase
+import com.example.db.add
 import com.example.entity.Message
+import com.example.entity.toChatMessage
 import com.example.util.fromJson
 import com.example.util.toJson
 import io.ktor.auth.*
@@ -15,7 +18,7 @@ import java.util.*
 fun Route.socketRoute() {
     authenticate("auth-jwt") {
         val connections: MutableMap<String, Connection> = Collections.synchronizedMap(LinkedHashMap())
-
+        val messageCol = DataBase.chatMessage
         webSocket("/socket") {
             val jwtUser = call.authentication.principal as JwtConfig.JwtUser
             val thisConnection = Connection(this, jwtUser)
@@ -27,7 +30,9 @@ fun Route.socketRoute() {
                     val message = frame.readText().fromJson<Message>()
                     val client = connections[message.receiver?.id.toString()]
                     client?.session?.send(message.toJson())
-                    thisConnection.session.send(message.toJson())
+                    if (message is Message.TextMessage){
+                        messageCol.add(message.toChatMessage())
+                    }
                 }
             } catch (e: Exception) {
                 println(e.localizedMessage)
