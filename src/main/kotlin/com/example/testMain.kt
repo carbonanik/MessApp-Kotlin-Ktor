@@ -1,30 +1,14 @@
 package com.example
 
+import com.example.entity.Message
+import com.example.util.fromJson
+
 
 //fun main() {
-//
-////    val num = listOf("01766785027", "+8801766785027", "+880 1766-78 50 27", "1766785027", "8801766785027")
-////
-////    val mappedNum = num.map {
-////        Regex("[^0-9]").replace(it, "")
-////    }.map {
-////        countryFromNumber(it)?.name
-////    }
-////
-////    println(mappedNum)
-//
-//    val countries = countriesList()
-//
-//    val uniquePhoneCode = mutableMapOf<String, Int>()
-//
-//    countries.forEach {
-//        val phoneCode = it.phoneCode
-//        uniquePhoneCode[phoneCode] = (uniquePhoneCode[phoneCode] ?: 0) + 1
-//    }
-//
-//    println(uniquePhoneCode.filter { it.value != 1 })
-//
-////    println(country)
+//    val j =
+//        "{\"type\":\"TextMessage\",\"sender\":{\"id\":\"6177bc56da8a825b0511b61a\",\"name\":\"Anik\",\"phone\":\"+8801766785027\"},\"receiver\":{\"id\":\"61750d64f7042b0530daac74\",\"name\":\"Marium\",\"phone\":\"+8801740541103\"},\"group\":null,\"id\":\"\",\"localId\":\"53a0d905-1db1-45b8-bdf7-48fdc74509b7\",\"time\":1637204522257,\"text\":\"hi\",\"image\":null}"
+//    val m = j.fromJson<Message>()
+//    println(m)
 //}
 
 //fun countryFromNumber(phone: String): Country? {

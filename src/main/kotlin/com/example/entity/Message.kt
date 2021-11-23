@@ -17,8 +17,8 @@ sealed class Message {
         val id: String,
         val localId: String,
         val time: Long,
-        val text: String,
-        val image: String,
+        val text: String? = null,
+        val image: String? = null,
     ) : Message()
 
 

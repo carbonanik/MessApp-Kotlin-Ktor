@@ -1,6 +1,7 @@
 package com.example.routing
 
 import com.example.authentication.JwtConfig
+import com.example.authenticationConfig
 import com.example.db.*
 import com.example.entity.toUser
 import io.ktor.application.*
@@ -12,7 +13,7 @@ import io.ktor.routing.*
 
 fun Route.userRouting() {
     route("/user") {
-        authenticate("auth-jwt") {
+        authenticate(authenticationConfig) {
             val userCol = DataBase.user
 
             /**

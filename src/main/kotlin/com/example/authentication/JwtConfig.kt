@@ -23,13 +23,14 @@ class JwtConfig(jwtSecret: String) {
             .withIssuer(jwtIssuer)
             .build()
 
+//    val expireTime = Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 30L)
     fun generateToken(user: JwtUser): String = JWT.create()
         .withSubject("Authentication")
         .withIssuer(jwtIssuer)
         .withClaim(CLAIM_PHONE, user.phone)
         .withClaim(CLAIM_NAME, user.name)
         .withClaim(CLAIM_ID, user.id)
-        .withExpiresAt(Date(System.currentTimeMillis() + 60 * 60 * 1000))
+        .withExpiresAt(Date(System.currentTimeMillis() + 2.628e+9.toLong()))
         .sign(jwtAlgorithm)
 
     fun configureKtorFeature(

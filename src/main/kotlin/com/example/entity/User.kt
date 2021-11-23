@@ -29,3 +29,6 @@ fun User.authResponse(token: String) =
 
 fun JwtConfig.JwtUser.toUser() =
     User(id = ObjectId(id), name, phone)
+
+fun  JwtConfig.JwtUser.authResponse(token: String) =
+    AuthResponse(token, id, name, phone)
