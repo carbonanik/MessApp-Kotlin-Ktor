@@ -38,11 +38,7 @@ fun Route.socketRoute() {
 
             // store session in the connections hash map
             connections[jwtUser.id] = thisConnection
-            println(jwtUser)
-            launch {
-                delay(5000)
-                cancel()
-            }
+//            println(jwtUser)
 
             try {
                 // looping through constantly incoming message
