@@ -13,6 +13,9 @@ import io.ktor.auth.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.util.*
 
@@ -36,10 +39,15 @@ fun Route.socketRoute() {
             // store session in the connections hash map
             connections[jwtUser.id] = thisConnection
             println(jwtUser)
+            launch {
+                delay(5000)
+                cancel()
+            }
 
             try {
                 // looping through constantly incoming message
                 for (frame in incoming) {
+
                     // incoming message or frame is not text then continue to next loop
                     frame as? Frame.Text ?: continue
                     // converting json text to object
@@ -72,11 +80,15 @@ fun Route.socketRoute() {
                         }
                         is Message.WanderingStatus -> {
                         }
+                        is Message.Authorization -> {
+
+                        }
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
+                // when session disconnected remove connection object from hash map
                 connections.remove(jwtUser.id)
             }
         }

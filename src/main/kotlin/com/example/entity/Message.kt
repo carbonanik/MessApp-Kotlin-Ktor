@@ -37,6 +37,11 @@ sealed class Message {
         val status: String,
     ) : Message()
 
+    @Serializable
+    @SerialName("Authorization")
+    data class Authorization(
+        val token: String
+    ) : Message()
 
     @Serializable
     sealed class RTCMessage : Message() {
