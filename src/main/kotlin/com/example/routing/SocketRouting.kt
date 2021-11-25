@@ -65,6 +65,7 @@ fun Route.socketRoute() {
                             send(status.messageToJson())
                         }
                         is Message.MessageStatusCarrier -> {
+                            connection?.session?.send(message.messageToJson())
                         }
                         is Message.RTCMessage.ICEMessage -> {
                         }

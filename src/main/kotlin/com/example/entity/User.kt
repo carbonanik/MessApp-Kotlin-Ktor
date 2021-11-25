@@ -2,6 +2,7 @@ package com.example.entity
 
 import com.example.authentication.JwtConfig
 import com.example.util.ObjectIDSerializer
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

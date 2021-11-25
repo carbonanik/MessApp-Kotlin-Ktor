@@ -13,7 +13,7 @@ object ObjectIDSerializer: KSerializer<ObjectId> {
     override val descriptor = PrimitiveSerialDescriptor("ObjectID", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): ObjectId {
-        return ObjectId()
+        return ObjectId(decoder.decodeString())
     }
 
     override fun serialize(encoder: Encoder, value: ObjectId) {
