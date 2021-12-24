@@ -2,8 +2,7 @@ package com.example.routing
 
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
-import com.example.db.DataBase
-import com.example.db.add
+import com.example.db.MessageCollection
 import com.example.entity.Message
 import com.example.entity.toChatMessage
 import com.example.util.createSentMessageStatus
@@ -13,20 +12,16 @@ import io.ktor.auth.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.util.*
 
 @OptIn(ExperimentalSerializationApi::class)
-fun Route.socketRoute() {
+fun Route.socketRoute(messageColl: MessageCollection) {
     authenticate(authenticationConfig) {
 
         // list(hash map) of all alive connection (socket session and their corresponding user)
         val connections: MutableMap<String, Connection> = Collections.synchronizedMap(LinkedHashMap())
         //message Database collection
-        val messageCol = DataBase.chatMessage
 
         webSocket("/socket") {
 
@@ -58,7 +53,7 @@ fun Route.socketRoute() {
                             connection?.session?.send(message.messageToJson())
 
                             // add message to database
-                            messageCol.add(message.toChatMessage())
+                            messageColl.add(message.toChatMessage())
 
                             // create sent status message and send back to sender of the message
                             val status = createSentMessageStatus(message.localId)
@@ -78,7 +73,6 @@ fun Route.socketRoute() {
                         is Message.WanderingStatus -> {
                         }
                         is Message.Authorization -> {
-
                         }
                     }
                 }

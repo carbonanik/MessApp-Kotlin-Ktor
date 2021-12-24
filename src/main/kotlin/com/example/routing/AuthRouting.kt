@@ -1,11 +1,8 @@
 package com.example.routing
 
-import com.auth0.jwt.JWT
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
-import com.example.db.DataBase
-import com.example.db.add
-import com.example.db.getByPhone
+import com.example.db.UserCollections
 import com.example.entity.*
 import com.example.jwtConfig
 import io.ktor.application.*
@@ -15,37 +12,52 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.authRouting() {
-    val userCol = DataBase.user
+fun Route.authRouting(userColl: UserCollections) {
 
-    route("/auth") {
-        post("/signup") {
-            val requestBody = call.receive<AuthRequest>()
-            val user = requestBody.createUser()
-                ?: return@post call.respondText("Insufficient Information", status = HttpStatusCode.NotAcceptable)
+    route(HttpRoutes.Auth.route) {
 
-            if (userCol.getByPhone(user.phone) != null) return@post call.respondText(
-                "Phone Number exist in database",
-                status = HttpStatusCode.Conflict
-            )
+        /**
+         * signup using the provided information
+         */
+        post(HttpRoutes.Auth.SIGNUP) {
+            val authRequest = call.receive<AuthRequest>()
 
-            if (userCol.add(user)) {
+            val user = authRequest.extractUser()
+                ?: return@post call.respondText(
+                    "Insufficient Information",
+                    status = HttpStatusCode.NotAcceptable
+                )
+
+            if (userColl.existUserByPhone(user.phone))
+                return@post call.respondText(
+                    "Phone number already exist in database",
+                    status = HttpStatusCode.Conflict
+                )
+
+            if (userColl.add(user)) {
                 val token = jwtConfig.generateToken(user.toJwtUser())
                 call.respond(user.authResponse(token))
-            } else call.respondText("User Creation Failed", status = HttpStatusCode.InternalServerError)
+            } else call.respondText(
+                "User Creation Failed",
+                status = HttpStatusCode.InternalServerError
+            )
         }
 
-        post("/login") {
+        /**
+         * login using password and phone
+         */
+        post(HttpRoutes.Auth.LOGIN) {
             val authRequest = call.receive<AuthRequest>()
             if (!authRequest.canLogin()) return@post call.respondText(
                 "Insufficient Information",
                 status = HttpStatusCode.NotAcceptable
             )
 
-            val user = userCol.getByPhone(authRequest.phone) ?: return@post call.respondText(
+            val user = userColl.getByPhone(authRequest.phone) ?: return@post call.respondText(
                 "No User Found",
                 status = HttpStatusCode.NotFound
             )
+
             if (user.password != authRequest.password) return@post call.respondText(
                 "Password Dose Not Match",
                 status = HttpStatusCode.NotFound
@@ -56,10 +68,13 @@ fun Route.authRouting() {
         }
 
         authenticate(authenticationConfig) {
-            get("/refresh-auth") {
+            /**
+             * refresh the auth token
+             */
+            get(HttpRoutes.Auth.REFRESH) {
+
                 val jwtUser = call.authentication.principal as JwtConfig.JwtUser
                 val token = jwtConfig.generateToken(jwtUser)
-                println(2.628e+9.toLong())
                 call.respond(jwtUser.authResponse(token))
             }
         }

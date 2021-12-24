@@ -2,7 +2,7 @@ package com.example.routing
 
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
-import com.example.db.*
+import com.example.db.UserCollections
 import com.example.entity.toUser
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -11,36 +11,38 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.userRouting() {
-    route("/user") {
+fun Route.userRouting(userColl: UserCollections) {
+    route(HttpRoutes.User.route) {
         authenticate(authenticationConfig) {
-            val userCol = DataBase.user
 
             /**
              * testing purpose only
              */
-            get("/me") {
+            get(HttpRoutes.User.ME) {
                 val jwtUser = call.authentication.principal as JwtConfig.JwtUser
                 call.respond(jwtUser.toUser())
             }
 
-            /**
-             * get total user list
-             * it will be removed
-             */
-            get("/list") {
-                val list = userCol.getAll()
-                if (list.isNotEmpty()) call.respond(list)
-                else call.respondText("No user found", status = HttpStatusCode.NotFound)
-            }
+//            /**
+//             * get total user list
+//             * it will be removed
+//             */
+//            get(HttpRoutes.User.GET_ALL) {
+//                val list = userColl.getAll()
+//                if (list.isNotEmpty()) call.respond(list)
+//                else call.respondText("No user found", status = HttpStatusCode.NotFound)
+//            }
 
             /**
              * get user by his name
              */
-            get("/by-name/{name}") {
+            get("${HttpRoutes.User.GET_BY_NAME}/{name}") {
                 val name = call.parameters["name"]
-                    ?: return@get call.respondText("No Name Provided Or Bad Request", status = HttpStatusCode.BadRequest)
-                val user = userCol.getByName(name)
+                    ?: return@get call.respondText(
+                        "No Name Provided Or Bad Request",
+                        status = HttpStatusCode.BadRequest
+                    )
+                val user = userColl.getByName(name)
                     ?: return@get call.respondText("No user with name $name", status = HttpStatusCode.NotFound)
                 call.respond(user)
             }
@@ -48,10 +50,10 @@ fun Route.userRouting() {
             /**
              * get user by his name
              */
-            get("/by-id/{id}") {
+            get("${HttpRoutes.User.GET_BY_ID}/{id}") {
                 val id = call.parameters["id"]
                     ?: return@get call.respondText("No ID Provided Or Bad Request", status = HttpStatusCode.BadRequest)
-                val user = userCol.getByID(id)
+                val user = userColl.getByID(id)
                     ?: return@get call.respondText("No user with ID $id", status = HttpStatusCode.NotFound)
                 call.respond(user)
             }
@@ -59,18 +61,21 @@ fun Route.userRouting() {
             /**
              * get list of user that match the number list provided by user
              */
-            post("/by-phone") {
+            post(HttpRoutes.User.GET_BY_PHONE) {
                 val numbers = call.receive<List<String>>()
-                val users = userCol.getByPhones(numbers)
+                val users = userColl.getByPhones(numbers)
 
                 if (users.isNotEmpty()) call.respond(users)
                 else call.respondText("No User Found", status = HttpStatusCode.NotFound)
             }
 
-            delete("/{id}") {
+            /**
+             * delete user by user id
+             */
+            delete("${HttpRoutes.User.DELETE_BY_ID}/{id}") {
                 val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
-                if (userCol.delete(id)) call.respondText("User Successfully Removed", status = HttpStatusCode.Accepted)
+                if (userColl.delete(id)) call.respondText("User Successfully Removed", status = HttpStatusCode.Accepted)
                 else call.respondText("Can't Removed User", status = HttpStatusCode.NotFound)
             }
         }

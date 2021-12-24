@@ -6,9 +6,7 @@ fun messageDigest(
     message: Message,
 ){
     when(message){
-        is Message.MessageStatusCarrier -> {
-
-        }
+        is Message.MessageStatusCarrier -> {}
         is Message.RTCMessage.ICEMessage -> {}
         is Message.RTCMessage.PeerLeft -> {}
         is Message.RTCMessage.RtcRequest -> {}

@@ -1,7 +1,8 @@
 package com.example.db
 
 import com.example.entity.ChatMessage
-import com.example.entity.Message
+import com.example.entity.Group
+import com.example.entity.Post
 import com.example.entity.User
 import com.example.remote
 import com.example.server
@@ -11,15 +12,20 @@ import org.litote.kmongo.reactivestreams.KMongo
 
 object DataBase {
 
-    val user: CoroutineCollection<User>
-    val chatMessage: CoroutineCollection<ChatMessage>
+    val userColl: CoroutineCollection<User>
+    val messageColl: CoroutineCollection<ChatMessage>
+    val groupColl: CoroutineCollection<Group>
+    val postColl: CoroutineCollection<Post>
 
     init {
         val client =
             if (server == remote) KMongo.createClient(System.getenv("MONGO_URI")).coroutine
             else KMongo.createClient().coroutine
         val database = client.getDatabase("MessApp")
-        user = database.getCollection("users")
-        chatMessage = database.getCollection("chatMessage")
+
+        userColl = database.getCollection("users")
+        messageColl = database.getCollection("chatMessage")
+        groupColl = database.getCollection("group")
+        postColl = database.getCollection("post")
     }
 }

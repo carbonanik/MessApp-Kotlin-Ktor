@@ -16,7 +16,7 @@ fun AuthRequest.canLogin() =
 fun AuthRequest.canSignup() =
     !name.isNullOrEmpty() && phone.isNotEmpty() && password.isNotEmpty()
 
-fun AuthRequest.createUser(): User? {
+fun AuthRequest.extractUser(): User? {
     if (!canSignup()) return null
     return User(name=name!!, phone = phone, password = password)
 }
