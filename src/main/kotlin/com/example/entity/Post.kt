@@ -23,5 +23,6 @@ enum class ContentType {
     IMAGE,
     VIDEO,
     PDF,
-    RAW_FILE
+    RAW_FILE,
+    UNSUPPORTED,
 }
