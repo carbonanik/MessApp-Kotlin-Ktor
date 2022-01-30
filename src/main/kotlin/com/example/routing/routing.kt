@@ -9,9 +9,10 @@ import io.ktor.routing.*
 
 fun Application.initializeRouting() {
     routing {
-        userRouting(UserCollections())
-        authRouting(UserCollections())
-        socketRoute(MessageCollection())
+        val userCollections = UserCollections()
+        userRouting(userCollections)
+        authRouting(userCollections)
+        socketRoute(MessageCollection(), userCollections)
         groupRouting(GroupCollection())
         fileRouting()
         get("/") {

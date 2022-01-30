@@ -5,6 +5,7 @@ import com.example.db.GroupCollection
 import com.example.entity.AddMemberToGroupRequest
 import com.example.entity.CreateGroupRequest
 import com.example.entity.extractGroup
+import com.example.socket_component.respondNotEmptyList
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -63,11 +64,7 @@ fun Route.groupRouting(groupColl: GroupCollection) {
 
                 val groupList = groupColl.getByUser(id)
 
-                if (groupList.isNotEmpty()) call.respond(groupList)
-                else call.respondText(
-                    "Does not have any group",
-                    status = HttpStatusCode.NotFound
-                )
+                call.respondNotEmptyList(groupList, "Does not have any group")
             }
         }
     }

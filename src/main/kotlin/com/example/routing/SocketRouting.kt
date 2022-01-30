@@ -3,20 +3,22 @@ package com.example.routing
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
 import com.example.db.MessageCollection
+import com.example.db.UserCollections
 import com.example.entity.Message
 import com.example.entity.toChatMessage
-import com.example.util.createSentMessageStatus
+import com.example.socket_component.sendMessage
 import com.example.util.fromJson
-import com.example.util.messageToJson
+import com.example.util.sentStatus
 import io.ktor.auth.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.util.*
 
 @OptIn(ExperimentalSerializationApi::class)
-fun Route.socketRoute(messageColl: MessageCollection) {
+fun Route.socketRoute(messageColl: MessageCollection, userCollection: UserCollections) {
     authenticate(authenticationConfig) {
 
         // list(hash map) of all alive connection (socket session and their corresponding user)
@@ -25,42 +27,65 @@ fun Route.socketRoute(messageColl: MessageCollection) {
 
         webSocket("/socket") {
 
-            // getting user from jwt payload
             val jwtUser = call.authentication.principal as JwtConfig.JwtUser
-
-            // connection object with this session and the user who connected with this session
             val thisConnection = Connection(this, jwtUser)
-
-            // store session in the connections hash map
             connections[jwtUser.id] = thisConnection
-//            println(jwtUser)
 
             try {
-                // looping through constantly incoming message
                 for (frame in incoming) {
-
-                    // incoming message or frame is not text then continue to next loop
                     frame as? Frame.Text ?: continue
-                    // converting json text to object
-                    val message = frame.readText().fromJson<Message>()
-                    // find the connection message sent for
-                    // if receiver not online there is on connection
-                    val connection = connections[message.receiver?.id.toString()]
+                    //incoming message
 
-                    when (message) {
+                    when (val message = frame.readText().fromJson<Message>()) {
                         is Message.TextMessage -> {
-                            // sent message to the receiver
-                            connection?.session?.send(message.messageToJson())
 
-                            // add message to database
-                            messageColl.add(message.toChatMessage())
+                            val couldNotDeliveredTo = mutableListOf<String>()
+                            var isSend = false
 
-                            // create sent status message and send back to sender of the message
-                            val status = createSentMessageStatus(message.localId)
-                            send(status.messageToJson())
+                            val receiver = message.receiver
+                            val group = message.group
+
+                            if (group != null) { // message for group
+                                group.members.forEach { id ->
+
+                                    val connection = connections[id]
+                                    if (connection != null) connection.sendMessage(message)
+                                    else couldNotDeliveredTo.add(id)
+
+                                    isSend = true
+                                }
+
+
+                            } else if (receiver != null) { // message for person
+                                val connection = connections[receiver.id.toString()]
+
+                                if (connection != null) connection.sendMessage(message)
+                                else couldNotDeliveredTo.add(receiver.id.toString())
+
+                            }
+
+                            if (couldNotDeliveredTo.isNotEmpty()) {
+                                val status = sentStatus(message.id)
+                                sendMessage(status)
+                            }
+
+                            launch {
+                                val messageId = messageColl
+                                    .add(message.toChatMessage()) ?: return@launch
+
+                                couldNotDeliveredTo.forEach {
+
+                                    userCollection.getByID(it)?.let { user ->
+                                        user.unreadMessage.add(messageId)
+                                        userCollection.update(user)
+                                    }
+                                }
+                            }
                         }
+
                         is Message.MessageStatusCarrier -> {
-                            connection?.session?.send(message.messageToJson())
+//                            val connection = connections[]
+//                            connection?.session?.send(message.messageToJson())
                         }
                         is Message.RTCMessage.ICEMessage -> {
                         }
@@ -71,8 +96,6 @@ fun Route.socketRoute(messageColl: MessageCollection) {
                         is Message.RTCMessage.SDPMessage -> {
                         }
                         is Message.WanderingStatus -> {
-                        }
-                        is Message.Authorization -> {
                         }
                     }
                 }

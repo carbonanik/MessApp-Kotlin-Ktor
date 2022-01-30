@@ -4,6 +4,7 @@ import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
 import com.example.db.UserCollections
 import com.example.entity.toUser
+import com.example.socket_component.respondNotEmptyList
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -16,7 +17,7 @@ fun Route.userRouting(userColl: UserCollections) {
         authenticate(authenticationConfig) {
 
             /**
-             * testing purpose only
+             * me / logged i user
              */
             get(HttpRoutes.User.ME) {
                 val jwtUser = call.authentication.principal as JwtConfig.JwtUser
@@ -42,9 +43,10 @@ fun Route.userRouting(userColl: UserCollections) {
                         "No Name Provided Or Bad Request",
                         status = HttpStatusCode.BadRequest
                     )
-                val user = userColl.getByName(name)
-                    ?: return@get call.respondText("No user with name $name", status = HttpStatusCode.NotFound)
-                call.respond(user)
+
+                val user = userColl.queryByName(name)
+
+                call.respondNotEmptyList(user, "No user with name $name")
             }
 
             /**
@@ -65,8 +67,7 @@ fun Route.userRouting(userColl: UserCollections) {
                 val numbers = call.receive<List<String>>()
                 val users = userColl.getByPhones(numbers)
 
-                if (users.isNotEmpty()) call.respond(users)
-                else call.respondText("No User Found", status = HttpStatusCode.NotFound)
+                call.respondNotEmptyList(users, "No User Found")
             }
 
             /**

@@ -17,8 +17,8 @@ class UserCollections {
     suspend fun getByID(id: String): User? =
         userColl.findOneById(ObjectId(id))
 
-    suspend fun getByName(name: String): User? =
-        userColl.findOne(User::name eq name)
+    suspend fun queryByName(name: String) =
+        userColl.find(User::name eq name).toList()
 
     suspend fun getByPhone(phone: String): User? =
         userColl.findOne(User::phone eq phone)
@@ -32,5 +32,7 @@ class UserCollections {
     suspend fun delete(id: String): Boolean =
         userColl.deleteOneById(id).wasAcknowledged()
 
-
+    suspend fun update(user: User){
+        userColl.updateOneById(id = user.id, update = user)
+    }
 }

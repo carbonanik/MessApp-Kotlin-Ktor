@@ -2,21 +2,13 @@ package com.example.util
 
 import com.example.entity.Message
 
-fun messageDigest(
+class MessageDigest (
     message: Message,
 ){
-    when(message){
-        is Message.MessageStatusCarrier -> {}
-        is Message.RTCMessage.ICEMessage -> {}
-        is Message.RTCMessage.PeerLeft -> {}
-        is Message.RTCMessage.RtcRequest -> {}
-        is Message.RTCMessage.SDPMessage -> {}
-        is Message.TextMessage -> {}
-        is Message.WanderingStatus -> {}
-    }
+
 }
 
-fun createSentMessageStatus(localId: String): Message.MessageStatusCarrier {
+fun sentStatus(localId: String): Message.MessageStatusCarrier {
     return Message.MessageStatusCarrier(
         messageLocalId = localId,
         time = System.currentTimeMillis(),

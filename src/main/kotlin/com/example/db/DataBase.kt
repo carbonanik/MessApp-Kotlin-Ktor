@@ -20,7 +20,9 @@ object DataBase {
     init {
         val client =
             if (server == remote) KMongo.createClient(System.getenv("MONGO_URI")).coroutine
+//                KMongo.createClient("mongodb+srv://MessAppServer:iuZpZTqBBx0h2nco@cluster0.jf6zp.mongodb.net/myFirstDatabase?retryWrites=true").coroutine
             else KMongo.createClient().coroutine
+
         val database = client.getDatabase("MessApp")
 
         userColl = database.getCollection("users")

@@ -19,6 +19,8 @@ data class User(
     val phone: String,
     @Transient
     val password: String? = null,
+    @Transient
+    val unreadMessage: MutableList<String> = mutableListOf()
 )
 
 fun User.toJwtUser() =

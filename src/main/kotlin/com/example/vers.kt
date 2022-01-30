@@ -11,7 +11,7 @@ const val remote = "remote"
  */
 const val server = remote
 
-val secret: String by lazy { if (server == remote) System.getenv("JWT_SECRET") ?: "" else "secret" }
+val secret: String by lazy { if (server == remote) System.getenv("JWT_SECRET") else "secret" }
 val jwtConfig by lazy { JwtConfig(secret) }
 val port by lazy { if (server == remote) System.getenv("PORT").toInt() else 8080 }
 

@@ -3,8 +3,8 @@ package com.example.routing
 import com.example.authenticationConfig
 import com.example.db.PostCollection
 import com.example.entity.CreatePostRequest
-import com.example.entity.Post
 import com.example.entity.createPost
+import com.example.socket_component.respondNotEmptyList
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -46,14 +46,7 @@ fun Route.postRouting(postColl: PostCollection) {
                 )
 
                 val posts = postColl.getAllOfUser(userId)
-                if (posts.isNotEmpty()) {
-                    call.respond(posts)
-                } else {
-                    call.respondText(
-                        "No post of this user found",
-                        status = HttpStatusCode.NotFound
-                    )
-                }
+                call.respondNotEmptyList(posts, "No post of this user found")
             }
 
             get("${HttpRoutes.Post.GET_ALL_UNTIL}/{time}") {
@@ -64,14 +57,8 @@ fun Route.postRouting(postColl: PostCollection) {
 
                 val posts = postColl.getAllUntil(time.toLong())
 
-                if (posts.isNotEmpty()) {
-                    call.respond(posts)
-                } else {
-                    call.respondText(
-                        "No post found",
-                        status = HttpStatusCode.NotFound
-                    )
-                }
+                call.respondNotEmptyList(posts, "No post found")
+
             }
 
             get("${HttpRoutes.Post.GET_ALL_BETWEEN}/{old_time}{new_time}") {
@@ -86,18 +73,13 @@ fun Route.postRouting(postColl: PostCollection) {
                 }
 
                 val posts = postColl.getAllBetween(oldTime.toLong(), newTime.toLong())
-                if (posts.isNotEmpty()){
-                    call.respond(posts)
-                } else {
-                    call.respondText (
-                        "No post found",
-                        status = HttpStatusCode.NotFound
-                            )
-                }
+                call.respondNotEmptyList(posts, "No post found")
             }
 
+            get("/page/{no}") {
+                val pageNo = call.parameters["no"]?.toIntOrNull()
 
-            /// authentication
+            }
         }
     }
 }

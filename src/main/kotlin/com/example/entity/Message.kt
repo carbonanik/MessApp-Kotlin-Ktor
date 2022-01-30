@@ -2,6 +2,7 @@ package com.example.entity
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.*
 
 
 @Serializable
@@ -15,10 +16,10 @@ sealed class Message {
     @SerialName("TextMessage")
     data class TextMessage(
         val id: String,
-        val localId: String,
-        val time: Long,
+        val timestamp: Long,
         val text: String? = null,
-        val image: String? = null,
+        val mediaUrl: String? = null,
+        val mediaType: String? = null,
     ) : Message()
 
 
@@ -37,11 +38,6 @@ sealed class Message {
         val status: String,
     ) : Message()
 
-    @Serializable
-    @SerialName("Authorization")
-    data class Authorization(
-        val token: String
-    ) : Message()
 
     @Serializable
     sealed class RTCMessage : Message() {

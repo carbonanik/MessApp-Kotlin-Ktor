@@ -1,6 +1,7 @@
 package com.example.db
 
 import com.example.entity.Post
+import org.litote.kmongo.coroutine.insertOne
 import org.litote.kmongo.eq
 import org.litote.kmongo.gt
 import org.litote.kmongo.lt
