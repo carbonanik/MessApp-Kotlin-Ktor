@@ -1,11 +1,11 @@
 package com.example.routing
 
 import com.example.authenticationConfig
-import com.example.db.GroupCollection
+import com.example.db.GroupDataSource
 import com.example.entity.AddMemberToGroupRequest
 import com.example.entity.CreateGroupRequest
 import com.example.entity.extractGroup
-import com.example.socket_component.respondNotEmptyList
+import com.example.util.respondNotEmptyList
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -13,7 +13,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.groupRouting(groupColl: GroupCollection) {
+fun Route.groupRouting(groupColl: GroupDataSource) {
     route(HttpRoutes.Group.route) {
         authenticate(authenticationConfig) {
 

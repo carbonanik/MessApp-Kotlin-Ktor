@@ -2,9 +2,8 @@ package com.example.routing
 
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
-import com.example.db.UserCollections
+import com.example.db.UserDataSource
 import com.example.entity.*
-import com.example.jwtConfig
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -12,10 +11,10 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.authRouting(userColl: UserCollections) {
+fun Route.authRouting(userColl: UserDataSource, jwtConfig: JwtConfig) {
 
     route(HttpRoutes.Auth.route) {
-
+        get { call.respondText("Auth Route") }
         /**
          * signup using the provided information
          */

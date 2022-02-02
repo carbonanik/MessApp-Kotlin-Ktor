@@ -1,35 +1,23 @@
 package com.example
 
-import com.example.plugin.configureJson
+import com.example.authentication.configureSecurity
+import com.example.di.configureKoin
+import com.example.plugin.configureStatusPage
+import com.example.plugin.configureWebSocket
 import com.example.routing.initializeRouting
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.features.*
-import io.ktor.http.cio.websocket.*
-import io.ktor.response.*
+import com.example.serialization.configureSerialization
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.websocket.*
-import java.time.Duration
+import org.koin.ktor.ext.get
 
 
 fun main() {
     embeddedServer(Netty, port = port) {
-        configureJson()
-        install(Authentication) {
-            jwt(authenticationConfig) {
-                jwtConfig.configureKtorFeature(this)
-            }
-        }
-        install(WebSockets){
-            pingPeriod = Duration.ofSeconds(5)
-        }
+        configureKoin()
+        configureSerialization()
+        configureSecurity(get())
+        configureWebSocket()
         initializeRouting()
-        install(StatusPages) {
-            exception<Throwable> { cause ->
-                call.respond(cause.localizedMessage)
-            }
-        }
+        configureStatusPage()
     }.start(wait = true)
 }

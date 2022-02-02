@@ -2,12 +2,12 @@ package com.example.routing
 
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
-import com.example.db.MessageCollection
-import com.example.db.UserCollections
+import com.example.db.MessageDataSource
+import com.example.db.UserDataSource
 import com.example.entity.Message
 import com.example.entity.toChatMessage
-import com.example.socket_component.sendMessage
-import com.example.util.fromJson
+import com.example.util.sendMessage
+import com.example.serialization.fromJson
 import com.example.util.sentStatus
 import io.ktor.auth.*
 import io.ktor.http.cio.websocket.*
@@ -18,7 +18,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import java.util.*
 
 @OptIn(ExperimentalSerializationApi::class)
-fun Route.socketRoute(messageColl: MessageCollection, userCollection: UserCollections) {
+fun Route.socketRoute(messageColl: MessageDataSource, userCollection: UserDataSource) {
     authenticate(authenticationConfig) {
 
         // list(hash map) of all alive connection (socket session and their corresponding user)

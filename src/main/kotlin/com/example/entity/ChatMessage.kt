@@ -7,12 +7,10 @@ import java.util.*
 data class ChatMessage(
     @BsonId
     val id: ObjectId,
-//    val localId: String,
     val timestamp: Long,
     val text: String? = null,
     val mediaUrl: String? = null,
     val mediaType: String? = null,
-
 
     val sender: User? = null,
     val receiver: User? = null,

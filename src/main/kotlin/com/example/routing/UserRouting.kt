@@ -2,9 +2,9 @@ package com.example.routing
 
 import com.example.authentication.JwtConfig
 import com.example.authenticationConfig
-import com.example.db.UserCollections
+import com.example.db.UserDataSource
 import com.example.entity.toUser
-import com.example.socket_component.respondNotEmptyList
+import com.example.util.respondNotEmptyList
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -12,7 +12,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.userRouting(userColl: UserCollections) {
+fun Route.userRouting(userColl: UserDataSource) {
     route(HttpRoutes.User.route) {
         authenticate(authenticationConfig) {
 

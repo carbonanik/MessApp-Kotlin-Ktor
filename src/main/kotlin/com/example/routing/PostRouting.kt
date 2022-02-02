@@ -1,10 +1,10 @@
 package com.example.routing
 
 import com.example.authenticationConfig
-import com.example.db.PostCollection
+import com.example.db.PostDataSource
 import com.example.entity.CreatePostRequest
 import com.example.entity.createPost
-import com.example.socket_component.respondNotEmptyList
+import com.example.util.respondNotEmptyList
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -12,7 +12,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.postRouting(postColl: PostCollection) {
+fun Route.postRouting(postColl: PostDataSource) {
     route(HttpRoutes.Post.route) {
         authenticate(authenticationConfig) {
             post(HttpRoutes.Post.CREATE) {
