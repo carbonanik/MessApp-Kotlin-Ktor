@@ -4,8 +4,9 @@ import com.example.entity.User
 import org.bson.types.ObjectId
 import org.litote.kmongo.`in`
 import org.litote.kmongo.coroutine.CoroutineCollection
-import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
+import org.litote.kmongo.pullAll
+import org.litote.kmongo.push
 
 class UserDataSource(private val userColl: CoroutineCollection<User>) {
 
@@ -31,9 +32,19 @@ class UserDataSource(private val userColl: CoroutineCollection<User>) {
         userColl.find(User::phone `in` numbers).toList()
 
     suspend fun delete(id: String): Boolean =
-        userColl.deleteOneById(id).wasAcknowledged()
+        userColl.deleteOneById(ObjectId(id)).wasAcknowledged()
 
-    suspend fun update(user: User){
+    suspend fun update(user: User) {
         userColl.updateOneById(id = user.id, update = user)
+    }
+
+    suspend fun addUnreadMessage(id: String, messageId: String) {
+        userColl.updateOneById(ObjectId(id), push(User::unreadMessage, messageId))
+    }
+
+    suspend fun removeAllUnreadMessage(id: String, messageIds: List<String>) {
+        userColl.updateOneById(ObjectId(id),
+            pullAll(User::unreadMessage, messageIds)
+        )
     }
 }

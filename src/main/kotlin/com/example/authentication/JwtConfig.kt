@@ -2,7 +2,6 @@ package com.example.authentication
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import java.util.*
 
@@ -51,5 +50,5 @@ class JwtConfig(jwtSecret: String) {
         }
     }
 
-    data class JwtUser(val id: String, val phone: String, val name: String) : Principal
 }
+

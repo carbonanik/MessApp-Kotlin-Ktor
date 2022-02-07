@@ -26,7 +26,7 @@ sealed class Message {
     @Serializable
     @SerialName("MessageStatusCarrier")
     data class MessageStatusCarrier(
-        val messageLocalId: String,
+        val messageId: String,
         val time: Long,
         val status: String
     ) : Message()

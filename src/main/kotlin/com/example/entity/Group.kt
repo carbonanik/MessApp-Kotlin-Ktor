@@ -4,6 +4,7 @@ import com.example.util.ObjectIDSerializer
 import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
+import org.litote.kmongo.id.toId
 
 @Serializable
 data class Group(

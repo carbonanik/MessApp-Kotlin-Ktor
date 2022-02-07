@@ -1,33 +1,51 @@
 package com.example.db
 
 import com.example.entity.Group
-import org.litote.kmongo.contains
+import org.bson.types.ObjectId
+import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineCollection
 
 class GroupDataSource(private val groupColl: CoroutineCollection<Group>) {
 
     suspend fun add(group: Group) = groupColl.insertOne(group).wasAcknowledged()
+
     suspend fun getByUser(userId: String): List<Group> {
-        return groupColl.find(Group::members.contains(userId)).toList()
+        return groupColl.find(Group::members contains userId).toList()
     }
 
-    suspend fun addUser(groupId: String, userIds: List<String>, asAdmin: Boolean = false): Group? {
+    suspend fun getById(id: String): Group? {
+        return groupColl.findOneById(ObjectId(id))
+    }
 
-        val group = groupColl.findOneById(groupId) ?: return null
+    suspend fun addAdmin(groupId: String, userId: String): Group? {
+        return if (groupColl
+                .updateOneById(ObjectId(groupId), push(Group::admin, userId))
+                .wasAcknowledged()
+        ) groupColl.findOneById(ObjectId(groupId))
+        else null
+    }
 
-        val newGroup = if (asAdmin) {
+    suspend fun removeAdmin(groupId: String, userId: String): Group? {
+        return if (groupColl
+                .updateOneById(ObjectId(groupId), pull(Group::admin, userId))
+                .wasAcknowledged()
+        ) groupColl.findOneById(ObjectId(groupId))
+        else null
+    }
 
-            val admin = group.admin.toMutableList()
-            admin.addAll(userIds)
-            Group(id = group.id, name = group.name, admin = admin, members = group.members)
-        } else {
+    suspend fun addMember(groupId: String, userIds: List<String>): Group? {
+        return if (groupColl
+                .updateOneById(id = ObjectId(groupId), pushEach(Group::members, userIds))
+                .wasAcknowledged()
+        ) groupColl.findOneById(ObjectId(groupId))
+        else null
+    }
 
-            val members = group.members.toMutableList()
-            members.addAll(userIds)
-            Group(id = group.id, name = group.name, admin = group.admin, members = members)
-        }
-
-        groupColl.replaceOneById(id = groupId, newGroup)
-        return newGroup
+    suspend fun removeMember(groupId: String, userIds: List<String>): Group? {
+        return if (groupColl
+                .updateOneById(id = ObjectId(groupId), pullAll(Group::members, userIds))
+                .wasAcknowledged()
+        ) groupColl.findOneById(ObjectId(groupId))
+        else null
     }
 }

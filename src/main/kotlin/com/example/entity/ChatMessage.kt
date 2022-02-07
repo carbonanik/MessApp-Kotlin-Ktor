@@ -16,23 +16,22 @@ data class ChatMessage(
     val receiver: User? = null,
     val group: Group? = null,
 
-    val senderId: ObjectId? = null,
-    val receiverId: ObjectId? = null,
-    val groupId: ObjectId? = null,
+    val senderId: String? = null,
+    val receiverId: String? = null,
+    val groupId: String? = null,
 )
 
 fun Message.TextMessage.toChatMessage(): ChatMessage {
 
     return ChatMessage(
         id = ObjectId(id),
-//        localId = localId,
         timestamp = timestamp,
         text = text,
         mediaUrl = mediaUrl,
 
-        senderId = (this as Message).sender?.id,
-        receiverId = (this as Message).receiver?.id,
-        groupId = (this as Message).group?.id,
+        senderId = (this as Message).sender?.id.toString(),
+        receiverId = (this as Message).receiver?.id.toString(),
+        groupId = (this as Message).group?.id.toString(),
 
         sender = (this as Message).sender,
         receiver = (this as Message).receiver,
@@ -43,9 +42,8 @@ fun Message.TextMessage.toChatMessage(): ChatMessage {
 fun ChatMessage.toMessage(): Message {
     return Message.TextMessage(
         id = id.toString(),
-//        localId = localId,
-        timestamp = timestamp,
         text = text,
+        timestamp = timestamp,
         mediaUrl = mediaUrl
     ).apply {
         this.sender = this@toMessage.sender

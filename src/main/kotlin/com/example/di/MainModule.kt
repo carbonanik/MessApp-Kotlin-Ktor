@@ -11,6 +11,7 @@ import com.example.entity.Post
 import com.example.entity.User
 import com.example.remote
 import com.example.server
+import com.example.util.SocketButterflies
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.CoroutineCollection
@@ -19,7 +20,7 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 
 const val USERS = "users"
-const val MESSAGE = "chatMessage"
+const val CHAT_MESSAGE = "chatMessage"
 const val GROUP = "group"
 const val POST = "post"
 
@@ -43,9 +44,9 @@ val mainModule = module {
 
     /** ChatMessage Collection */
     factory<CoroutineCollection<ChatMessage>>(
-        qualifier = named(MESSAGE)
+        qualifier = named(CHAT_MESSAGE)
     ) {
-        (get() as CoroutineDatabase).getCollection(MESSAGE)
+        (get() as CoroutineDatabase).getCollection(CHAT_MESSAGE)
     }
 
     /** Group Collection */
@@ -72,7 +73,7 @@ val mainModule = module {
     /** Message Data Queries */
     single {
         MessageDataSource(
-            get(qualifier = named(MESSAGE))
+            get(qualifier = named(CHAT_MESSAGE))
         )
     }
 
@@ -88,6 +89,11 @@ val mainModule = module {
         PostDataSource(
             get(qualifier = named(POST))
         )
+    }
+
+    /** Hold All the socket connections */
+    single {
+        SocketButterflies(get(), get())
     }
 
     /** Authentication Configuration */

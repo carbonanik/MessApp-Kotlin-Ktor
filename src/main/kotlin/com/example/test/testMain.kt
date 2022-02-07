@@ -1,7 +1,28 @@
 package com.example.test
 
+import com.example.entity.Message
+import com.example.entity.User
+import com.example.serialization.messageToJson
+import com.example.serialization.toJson
+import org.bson.types.ObjectId
 
-//fun main() {
+
+fun main() {
+    val m = Message.TextMessage(
+        ObjectId().toString(), 100, "Hi"
+    ).apply {
+        sender = User(
+            name = "Anik",
+            phone = "01766"
+        )
+        receiver = User(
+            name = "Banana",
+            phone = "014234"
+        )
+    }
+
+    println(m.messageToJson())
+}
 //
 //    val file = File("upload/sell.json")
 //    val jData = file.bufferedReader().readText()

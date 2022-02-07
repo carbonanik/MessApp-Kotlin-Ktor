@@ -12,12 +12,12 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.postRouting(postColl: PostDataSource) {
+fun Route.postRouting(postData: PostDataSource) {
     route(HttpRoutes.Post.route) {
         authenticate(authenticationConfig) {
             post(HttpRoutes.Post.CREATE) {
                 val post = call.receive<CreatePostRequest>().createPost()
-                if (postColl.add(post)) {
+                if (postData.add(post)) {
                     call.respond(post)
                 } else {
                     call.respondText(
@@ -32,7 +32,7 @@ fun Route.postRouting(postColl: PostDataSource) {
                     "No id provided",
                     status = HttpStatusCode.NotAcceptable
                 )
-                val post = postColl.getById(postId) ?: return@get call.respondText(
+                val post = postData.getById(postId) ?: return@get call.respondText(
                     "Post Not Found Or Internal Error",
                     status = HttpStatusCode.NotFound
                 )
@@ -45,7 +45,7 @@ fun Route.postRouting(postColl: PostDataSource) {
                     status = HttpStatusCode.NotAcceptable
                 )
 
-                val posts = postColl.getAllOfUser(userId)
+                val posts = postData.getAllOfUser(userId)
                 call.respondNotEmptyList(posts, "No post of this user found")
             }
 
@@ -55,15 +55,15 @@ fun Route.postRouting(postColl: PostDataSource) {
                     status = HttpStatusCode.NotAcceptable
                 )
 
-                val posts = postColl.getAllUntil(time.toLong())
+                val posts = postData.getAllUntil(time.toLong())
 
                 call.respondNotEmptyList(posts, "No post found")
 
             }
 
-            get("${HttpRoutes.Post.GET_ALL_BETWEEN}/{old_time}{new_time}") {
-                val oldTime = call.parameters["old_time"]
-                val newTime = call.parameters["new_time"]
+            get(HttpRoutes.Post.GET_ALL_BETWEEN) {
+                val oldTime = call.request.queryParameters["old_time"]
+                val newTime = call.request.queryParameters["new_time"]
 
                 if (oldTime == null || newTime == null) {
                     return@get call.respondText(
@@ -72,13 +72,23 @@ fun Route.postRouting(postColl: PostDataSource) {
                     )
                 }
 
-                val posts = postColl.getAllBetween(oldTime.toLong(), newTime.toLong())
+                val posts = postData.getAllBetween(oldTime.toLong(), newTime.toLong())
                 call.respondNotEmptyList(posts, "No post found")
             }
 
-            get("/page/{no}") {
-                val pageNo = call.parameters["no"]?.toIntOrNull()
+            // todo not implemented
+            get("${HttpRoutes.Post.GET_ALL_PAGED}/{page}") {
+                val pageNo = call.parameters["page"]?.toIntOrNull()
+                call.respondText("Not Implemented", status = HttpStatusCode.NotImplemented)
+            }
 
+            delete("${HttpRoutes.Post.DELETE}/{id}"){
+                val id = call.parameters["id"]?: return@delete call.respondText(
+                    "No id provided",
+                    status = HttpStatusCode.NotAcceptable
+                )
+                if (postData.delete(id)) call.respondText("Post Successfully Removed", status = HttpStatusCode.Accepted)
+                else call.respondText("Can't Removed Post", status = HttpStatusCode.NotFound)
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.example.util
 
 import com.example.entity.Message
-import com.example.routing.Connection
+import com.example.entity.Connection
 import com.example.serialization.messageToJson
 import io.ktor.application.*
 import io.ktor.http.*
@@ -17,8 +17,8 @@ suspend fun DefaultWebSocketSession.sendMessage(message: Message) {
     send(message.messageToJson())
 }
 
-suspend fun <T> ApplicationCall.respondNotEmptyList(
-    list: List<T>?,
+suspend fun ApplicationCall.respondNotEmptyList(
+    list: List<Any>?,
     errStr: String = "No Item Found",
     errStatusCode: HttpStatusCode = HttpStatusCode.NotFound
 ) {
@@ -29,6 +29,9 @@ suspend fun <T> ApplicationCall.respondNotEmptyList(
     }
 }
 
-suspend inline fun ApplicationCall.nullRespond(errStr: String = "Null Parameter / Data") {
-    return respondText(errStr, status = HttpStatusCode.NotAcceptable)
+suspend fun ApplicationCall.nullRespond(
+    errStr: String = "Null Parameter / Data",
+    status: HttpStatusCode = HttpStatusCode.NotAcceptable
+) {
+    respondText(errStr, status = status)
 }

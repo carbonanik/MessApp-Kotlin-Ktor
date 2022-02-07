@@ -4,7 +4,7 @@ import com.example.entity.Message
 
 fun sentStatus(localId: String): Message.MessageStatusCarrier {
     return Message.MessageStatusCarrier(
-        messageLocalId = localId,
+        messageId = localId,
         time = System.currentTimeMillis(),
         status = "SENT",
     )

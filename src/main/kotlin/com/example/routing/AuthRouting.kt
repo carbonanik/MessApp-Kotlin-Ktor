@@ -1,6 +1,7 @@
 package com.example.routing
 
 import com.example.authentication.JwtConfig
+import com.example.authentication.getJwtUser
 import com.example.authenticationConfig
 import com.example.db.UserDataSource
 import com.example.entity.*
@@ -11,7 +12,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.authRouting(userColl: UserDataSource, jwtConfig: JwtConfig) {
+fun Route.authRouting(userDataSource: UserDataSource, jwtConfig: JwtConfig) {
 
     route(HttpRoutes.Auth.route) {
         get { call.respondText("Auth Route") }
@@ -27,13 +28,13 @@ fun Route.authRouting(userColl: UserDataSource, jwtConfig: JwtConfig) {
                     status = HttpStatusCode.NotAcceptable
                 )
 
-            if (userColl.existUserByPhone(user.phone))
+            if (userDataSource.existUserByPhone(user.phone))
                 return@post call.respondText(
                     "Phone number already exist in database",
                     status = HttpStatusCode.Conflict
                 )
 
-            if (userColl.add(user)) {
+            if (userDataSource.add(user)) {
                 val token = jwtConfig.generateToken(user.toJwtUser())
                 call.respond(user.authResponse(token))
             } else call.respondText(
@@ -52,7 +53,7 @@ fun Route.authRouting(userColl: UserDataSource, jwtConfig: JwtConfig) {
                 status = HttpStatusCode.NotAcceptable
             )
 
-            val user = userColl.getByPhone(authRequest.phone) ?: return@post call.respondText(
+            val user = userDataSource.getByPhone(authRequest.phone) ?: return@post call.respondText(
                 "No User Found",
                 status = HttpStatusCode.NotFound
             )
@@ -72,7 +73,8 @@ fun Route.authRouting(userColl: UserDataSource, jwtConfig: JwtConfig) {
              */
             get(HttpRoutes.Auth.REFRESH) {
 
-                val jwtUser = call.authentication.principal as JwtConfig.JwtUser
+                //fixme retrieve user from database
+                val jwtUser = call.getJwtUser()
                 val token = jwtConfig.generateToken(jwtUser)
                 call.respond(jwtUser.authResponse(token))
             }

@@ -10,8 +10,10 @@ fun Application.initializeRouting() {
     routing {
         userRouting(get())
         authRouting(get(), get())
-        socketRoute(get(), get())
+        socketRoute(get())
+        messageRouting(get(), get(), get())
         groupRouting(get())
+        postRouting(get())
         fileRouting()
         get("/") {
             call.respondText("Hello, world!")

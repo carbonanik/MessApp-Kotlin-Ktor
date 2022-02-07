@@ -8,3 +8,5 @@ data class AddMemberToGroupRequest(
     val userIds: List<String>,
     val asAdmin: Boolean
 )
+
+typealias RemoveMemberFromGroupRequest = AddMemberToGroupRequest

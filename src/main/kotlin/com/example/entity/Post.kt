@@ -11,12 +11,12 @@ data class Post(
     @Serializable(with = ObjectIDSerializer::class)
     val id: ObjectId = ObjectId(),
     val authorId: String,
-    val title: String,
+    val title: String? = null,
     val body: String,
     val time: Long,
     val privacy: String,
-    val contentUrl: String,
-    val contentType: String,
+    val contentUrl: String? = null,
+    val contentType: String? = null,
 )
 
 enum class ContentType {

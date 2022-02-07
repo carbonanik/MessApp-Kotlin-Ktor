@@ -1,6 +1,7 @@
 package com.example.entity
 
 import com.example.authentication.JwtConfig
+import com.example.authentication.JwtUser
 import com.example.util.ObjectIDSerializer
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -24,14 +25,14 @@ data class User(
 )
 
 fun User.toJwtUser() =
-    JwtConfig.JwtUser(id.toString(), phone, name)
+    JwtUser(id.toString(), phone, name)
 
 fun User.authResponse(token: String) =
     AuthResponse(token, id.toString(), name, phone)
 
 
-fun JwtConfig.JwtUser.toUser() =
+fun JwtUser.toUser() =
     User(id = ObjectId(id), name, phone)
 
-fun  JwtConfig.JwtUser.authResponse(token: String) =
+fun JwtUser.authResponse(token: String) =
     AuthResponse(token, id, name, phone)
